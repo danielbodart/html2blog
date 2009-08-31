@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="html2blog" default="build">
+
+
+    <property name="build.number" value="dev"/>
+    <property name="build.name" value="${ant.project.name}.${build.number}"/>
+    <property name="build" value="${basedir}/build"/>
+    <property name="build.output" value="${build}/output"/>
+    <property name="distribution" value="${build.output}/dist"/>
+    <property name="src" value="${basedir}/src"/>
+    <property name="release.jar" value="${distribution}/${build.name}.jar"/>
+    <property name="release.no.dependancies.jar" value="${distribution}/${build.name}.no.dependancies.jar"/>
+
+    <import file="${build}/macros.xml"/>
+
+    <path id="all.dependancies">
+        <fileset id="build.dependancies" dir="build/lib" includes="**/*.jar"/>
+        <fileset id="release.dependancies" dir="lib" includes="**/*.jar"/>
+    </path>
+
+    <path id="all.jars">
+        <path refid="all.dependancies"/>
+        <path path="${release.jar}"/>
+    </path>
+
+    <target name="clean" description="cleanup all">
+        <delete dir="${build.output}"/>
+    </target>
+
+    <target name="compile">
+        <compile.and.jar src="${src}" jar="${release.jar}" classpathref="all.dependancies"/>
+    </target>
+
+    <target name="package">
+        <mkdir dir="${distribution}"/>
+
+        <zip destfile="${distribution}/${build.name}.src.zip" basedir="src"/>
+
+        <one-jar destfile="${release.no.dependancies.jar}" manifest="build/one-jar.mf">
+            <main/>
+            <lib>
+                <fileset file="${release.jar}" />
+                <fileset refid="release.dependancies" />
+            </lib>
+        </one-jar>
+        
+        <propertyfile file="${distribution}/build.properties">
+          <entry key="stored.build.number" value="${build.number}"/>
+          <entry key="stored.build.name" value="${build.name}"/>
+        </propertyfile>
+    </target>
+
+    <target name="build" depends="clean, compile, package" description="build all"/>
+
+    <target name="server" depends="build" description="run web server">
+        <java classname="org.webfabric.jetty.RunWebServer" fork="true">
+            <classpath>
+                <path refid="all.jars"/>
+                <pathelement path="${java.class.path}"/>
+            </classpath>
+        </java>
+    </target>
+
+</project>
