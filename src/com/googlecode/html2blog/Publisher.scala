@@ -11,11 +11,10 @@ class Publisher(properties:Properties){
   val url: URL = new URL(properties.getProperty("url"))
   val credentials: Credentials = Credentials(properties.getProperty("user"), properties.getProperty("password"))
 
-  def publish(input:InputStream){
+  def publish(input:InputStream): String = {
     val server = Server(url, credentials)
     val content = parse(input)
-    val id = server.createDraft(content)
-    System.out.println("Created Draft Post: #" + id)
+    server.createDraft(content)
   }
 
   def parse(input:InputStream):Content ={

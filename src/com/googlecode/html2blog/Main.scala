@@ -12,6 +12,7 @@ object Main {
       properties.load(new FileReader(filename))
     }
     val publisher = new Publisher(properties)
-    publisher.publish(System.in)
+    val postUrl = publisher.publish(System.in)
+    System.out.println(postUrl)
   }
 }
